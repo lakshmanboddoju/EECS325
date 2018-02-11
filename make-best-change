@@ -1,0 +1,21 @@
+(defun make-best-change (cents &optional (lst '(25 10 5 1)))
+  (values-list (reverse (car (make-change cents lst)))))
+
+(defun make-change (cents lst &key (current nil) (best nil))
+  (do ((choices (when (not (null lst)) 
+                  (loop for i from (floor cents (car lst)) downto 0 collect i)) 
+                (cdr choices))
+       (temp-best best (make-change (- cents (* (car choices) (car lst)))
+                                    (cdr lst)
+                                    :current (cons (car choices) current)
+                                    :best temp-best)))
+      ((null choices) (get-best cents current temp-best))))
+
+(defun get-best (cents current best)
+  (cond 
+   ((or (null best)
+        (< cents (cdr best))
+        (and (= cents (cdr best))
+             (< (reduce #'+ current) (reduce #'+ (car best)))))
+    (cons current cents))
+   (t best)))
